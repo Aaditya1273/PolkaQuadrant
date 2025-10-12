@@ -401,31 +401,118 @@ cargo build --release
 
 ---
 
-## 🎬 Quick Start
+## 🚀 Quick Start
 
-### 1. Start Local Blockchain Node
+### Setup Workflow
+
+```mermaid
+graph LR
+    A[📥 Clone Repo] --> B[📦 Install Dependencies]
+    B --> C[⛓️ Start Substrate Node]
+    C --> D[🧪 Run Tests]
+    D --> E[🖥️ Start Backend]
+    E --> F[🎨 Start Frontend]
+    F --> G[✅ Access Dashboard]
+    
+    style A fill:#4dabf7,stroke:#1971c2,color:#fff
+    style C fill:#e64980,stroke:#c2255c,color:#fff
+    style G fill:#51cf66,stroke:#2f9e44,color:#fff
+```
+
+### 1️⃣ Clone & Install
 
 ```bash
+# Clone the repository
+git clone https://github.com/Aaditya1273/PolkaQuadrant.git
+cd PolkaQuadrant
+
+# Install root dependencies
+npm install
+
+# Install backend dependencies
+cd backend && npm install && cd ..
+
+# Install frontend dependencies
+cd frontend && npm install && cd ..
+```
+
+### 2️⃣ Start Substrate Node (Required)
+
+```bash
+# Clone the Quadratic Funding Pallet
+git clone https://github.com/OAK-Foundation/quadratic-funding-pallet
 cd quadratic-funding-pallet
+
+# Build the node (takes 10-30 minutes first time)
+cargo build --release
+
+# Start local development node
 ./target/release/node-template --dev --tmp
 ```
 
-The node will start on `ws://127.0.0.1:9944` by default.
+**Node will run on**: `ws://127.0.0.1:9944`
 
-### 2. Run All Tests
+### 3️⃣ Run Tests
 
 ```bash
+cd PolkaQuadrant
+
+# Run all tests
 npm test
+
+# Run specific test suites
+npm run "test unit"        # Unit tests only
+npm run "test functional"  # Functional tests only
 ```
 
-### 3. Run Specific Test Suites
+### 4️⃣ Start Backend API
 
 ```bash
-# Unit tests only
-npm run "test unit"
+cd backend
 
-# Functional tests only
-npm run "test functional"
+# Create environment file
+cp .env.example .env
+
+# Start development server
+npm run dev
+```
+
+**Backend will run on**: `http://localhost:4000`
+
+### 5️⃣ Start Frontend Dashboard
+
+```bash
+cd frontend
+
+# Create environment file
+cp .env.example .env.local
+
+# Start development server
+npm run dev
+```
+
+**Frontend will run on**: `http://localhost:3000`
+
+### 6️⃣ Access the Dashboard
+
+Open your browser and navigate to:
+- **Dashboard**: http://localhost:3000
+- **Backend API**: http://localhost:4000/health
+- **API Docs**: http://localhost:4000/api/v1
+
+### Quick Test Commands
+
+```bash
+# Test AI fraud detection
+curl -X POST http://localhost:4000/api/v1/ai/analyze-contribution \
+  -H "Content-Type: application/json" \
+  -d '{"contributorAddress":"0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb","amount":100}'
+
+# Check blockchain connection
+curl http://localhost:4000/api/v1/blockchain/status
+
+# View beta testing analytics
+curl http://localhost:4000/api/v1/feedback/analytics
 ```
 
 ---
