@@ -1,4 +1,5 @@
-import * as tf from '@tensorflow/tfjs-node';
+// Simplified fraud detection without TensorFlow (for demo/hackathon)
+// Uses rule-based ML algorithms instead of neural networks
 import { ContributionData, FraudDetectionResult, RiskFactors } from '../types/ai';
 
 /**

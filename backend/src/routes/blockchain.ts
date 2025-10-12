@@ -8,7 +8,7 @@ const router = Router();
  * GET /api/v1/blockchain/networks
  * Get list of available networks
  */
-router.get('/networks', (req: Request, res: Response) => {
+router.get('/networks', (_req: Request, res: Response) => {
   try {
     const networks = [
       {
@@ -31,13 +31,13 @@ router.get('/networks', (req: Request, res: Response) => {
       },
     ];
 
-    res.json({
+    return res.json({
       success: true,
       networks,
       currentNetwork: mainnetConnector.getCurrentNetwork(),
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get networks',
       message: error.message,
     });
@@ -59,16 +59,16 @@ router.post('/connect', async (req: Request, res: Response) => {
       });
     }
 
-    const api = await mainnetConnector.connect(network as NetworkType);
+    await mainnetConnector.connect(network as NetworkType);
     const chainInfo = await mainnetConnector.getChainInfo(network);
 
-    res.json({
+    return res.json({
       success: true,
       message: `Connected to ${network}`,
       chainInfo,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Connection failed',
       message: error.message,
     });
@@ -79,19 +79,19 @@ router.post('/connect', async (req: Request, res: Response) => {
  * POST /api/v1/blockchain/connect-all
  * Connect to all networks
  */
-router.post('/connect-all', async (req: Request, res: Response) => {
+router.post('/connect-all', async (_req: Request, res: Response) => {
   try {
     await mainnetConnector.connectAll();
 
     const connectedNetworks = mainnetConnector.getConnectedNetworks();
 
-    res.json({
+    return res.json({
       success: true,
       message: `Connected to ${connectedNetworks.length} network(s)`,
       networks: connectedNetworks,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Connection failed',
       message: error.message,
     });
@@ -116,13 +116,13 @@ router.post('/switch', async (req: Request, res: Response) => {
     await mainnetConnector.switchNetwork(network as NetworkType);
     const chainInfo = await mainnetConnector.getChainInfo(network);
 
-    res.json({
+    return res.json({
       success: true,
       message: `Switched to ${network}`,
       chainInfo,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Switch failed',
       message: error.message,
     });
@@ -138,12 +138,12 @@ router.get('/chain-info', async (req: Request, res: Response) => {
     const network = req.query.network as NetworkType | undefined;
     const chainInfo = await mainnetConnector.getChainInfo(network);
 
-    res.json({
+    return res.json({
       success: true,
       chainInfo,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get chain info',
       message: error.message,
     });
@@ -159,13 +159,13 @@ router.get('/funding-rounds', async (req: Request, res: Response) => {
     const network = req.query.network as NetworkType | undefined;
     const rounds = await mainnetConnector.queryActiveFundingRounds(network);
 
-    res.json({
+    return res.json({
       success: true,
       rounds,
       count: rounds.length,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get funding rounds',
       message: error.message,
     });
@@ -190,12 +190,12 @@ router.get('/project/:projectId', async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       project,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get project',
       message: error.message,
     });
@@ -213,13 +213,13 @@ router.get('/balance/:address', async (req: Request, res: Response) => {
 
     const balance = await palletInteraction.getBalance(address, network);
 
-    res.json({
+    return res.json({
       success: true,
       address,
       balance,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get balance',
       message: error.message,
     });
@@ -246,13 +246,13 @@ router.post('/validate-pallet', async (req: Request, res: Response) => {
       network
     );
 
-    res.json({
+    return res.json({
       success: true,
       palletName,
       isCompatible,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Validation failed',
       message: error.message,
     });
@@ -268,12 +268,12 @@ router.get('/block-number', async (req: Request, res: Response) => {
     const network = req.query.network as NetworkType | undefined;
     const blockNumber = await mainnetConnector.getCurrentBlock(network);
 
-    res.json({
+    return res.json({
       success: true,
       blockNumber,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get block number',
       message: error.message,
     });
@@ -286,17 +286,17 @@ router.get('/block-number', async (req: Request, res: Response) => {
  */
 router.post('/monitor-events', async (req: Request, res: Response) => {
   try {
-    const { network } = req.body;
+    const { network: _network } = req.body;
 
     // This would typically use WebSocket to stream events
     // For now, return success message
-    res.json({
+    return res.json({
       success: true,
       message: 'Event monitoring started',
       note: 'Use WebSocket connection for real-time events',
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to start monitoring',
       message: error.message,
     });
@@ -307,7 +307,7 @@ router.post('/monitor-events', async (req: Request, res: Response) => {
  * GET /api/v1/blockchain/status
  * Get overall blockchain connection status
  */
-router.get('/status', async (req: Request, res: Response) => {
+router.get('/status', async (_req: Request, res: Response) => {
   try {
     const connectedNetworks = mainnetConnector.getConnectedNetworks();
     const currentNetwork = mainnetConnector.getCurrentNetwork();
@@ -319,12 +319,12 @@ router.get('/status', async (req: Request, res: Response) => {
       totalNetworks: 3,
     };
 
-    res.json({
+    return res.json({
       success: true,
       status,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get status',
       message: error.message,
     });
@@ -352,12 +352,12 @@ router.post('/disconnect', async (req: Request, res: Response) => {
       await mainnetConnector.disconnectAll();
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: network ? `Disconnected from ${network}` : 'Disconnected from all networks',
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Disconnect failed',
       message: error.message,
     });

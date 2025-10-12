@@ -276,7 +276,7 @@ export class DataGenerator {
   /**
    * Export dataset to JSON
    */
-  exportToJSON(dataset: ContributionData[], filename: string = 'training_data.json'): string {
+  exportToJSON(dataset: ContributionData[], _filename: string = 'training_data.json'): string {
     return JSON.stringify({
       metadata: {
         totalSamples: dataset.length,

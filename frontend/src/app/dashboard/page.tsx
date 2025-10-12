@@ -7,11 +7,12 @@ import MetricsCard from '@/components/dashboard/MetricsCard';
 import FraudAlerts from '@/components/dashboard/FraudAlerts';
 import NetworkStatus from '@/components/dashboard/NetworkStatus';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { Activity, AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, TrendingUp, Zap, Radio } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const { data: liveData, isConnected } = useWebSocket('ws://localhost:4000');
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Mock data - will be replaced with real data from API
   const [metrics, setMetrics] = useState({
@@ -19,6 +20,8 @@ export default function DashboardPage() {
     activeAlerts: 3,
     testCoverage: 95.4,
     mainnetStatus: 'connected',
+    aiAccuracy: 99.2,
+    throughtput: '10K+',
   });
 
   const [quadrantData, setQuadrantData] = useState([
@@ -28,6 +31,12 @@ export default function DashboardPage() {
     { x: 12000, y: 78, r: 25, label: 'Project D', risk: 0.3 },
     { x: 6500, y: 88, r: 18, label: 'Project E', risk: 0.15 },
   ]);
+
+  // Hydration fix
+  useEffect(() => {
+    setIsHydrated(true);
+    setDarkMode(true);
+  }, []);
 
   useEffect(() => {
     // Update metrics from live data
@@ -41,53 +50,98 @@ export default function DashboardPage() {
 
   // Toggle dark mode
   useEffect(() => {
+    if (!isHydrated) return;
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [darkMode]);
+  }, [darkMode, isHydrated]);
+
+  if (!isHydrated) {
+    return null;
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: 'easeOut' },
+    },
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      {/* Cleaner Background */}
+      <div className="fixed inset-0 z-0">
+        {darkMode ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-emerald-950/20"></div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-emerald-50/30 to-white"></div>
+        )}
+      </div>
+
       {/* Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700"
+        transition={{ duration: 0.5 }}
+        className={`relative z-20 backdrop-blur-xl border-b sticky top-0 ${
+          darkMode 
+            ? 'bg-gray-800/90 border-gray-700' 
+            : 'bg-white/95 border-gray-200 shadow-sm'
+        }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-polkadot-pink to-polkadot-purple rounded-lg flex items-center justify-center">
+            {/* Logo & Title */}
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50 animate-pulse-glow">
                 <span className="text-2xl">🪐</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  PolkaQuadrant
+                <h1 className={`text-2xl font-black ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent">Polka</span>Quadrant
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  AI-Secured Quadratic Funding Validator
-                </p>
+                <p className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>AI-Secured Validator</p>
               </div>
             </div>
 
+            {/* Controls */}
             <div className="flex items-center space-x-4">
               {/* Network Status */}
               <NetworkStatus isConnected={isConnected} />
 
+              {/* Live Indicator */}
+              <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+                <span className="text-xs font-mono text-emerald-300">Live</span>
+              </div>
+
               {/* Dark Mode Toggle */}
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-400/60 hover:bg-emerald-500/20 transition-all duration-300"
                 aria-label="Toggle dark mode"
               >
                 {darkMode ? (
-                  <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-emerald-300" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                   </svg>
                 )}
@@ -98,67 +152,78 @@ export default function DashboardPage() {
       </motion.header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Metrics Cards */}
         <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8"
         >
-          <MetricsCard
-            title="Total Rounds"
-            value={metrics.totalRounds}
-            icon={<Activity className="w-6 h-6" />}
-            trend="+2 this month"
-            color="blue"
-          />
-          <MetricsCard
-            title="Active Alerts"
-            value={metrics.activeAlerts}
-            icon={<AlertTriangle className="w-6 h-6" />}
-            trend="3 flagged"
-            color="red"
-          />
-          <MetricsCard
-            title="Test Coverage"
-            value={`${metrics.testCoverage}%`}
-            icon={<CheckCircle className="w-6 h-6" />}
-            trend="+5% this week"
-            color="green"
-          />
-          <MetricsCard
-            title="Mainnet Status"
-            value={metrics.mainnetStatus}
-            icon={<TrendingUp className="w-6 h-6" />}
-            trend="Acala connected"
-            color="purple"
-          />
+          <motion.div variants={itemVariants} className="lg:col-span-1.5">
+            <MetricsCard
+              title="Total Rounds"
+              value={metrics.totalRounds}
+              icon={<Activity className="w-5 h-5" />}
+              trend="+2 this month"
+              color="emerald"
+            />
+          </motion.div>
+          <motion.div variants={itemVariants} className="lg:col-span-1.5">
+            <MetricsCard
+              title="Active Alerts"
+              value={metrics.activeAlerts}
+              icon={<AlertTriangle className="w-5 h-5" />}
+              trend="3 flagged"
+              color="red"
+            />
+          </motion.div>
+          <motion.div variants={itemVariants} className="lg:col-span-1.5">
+            <MetricsCard
+              title="AI Accuracy"
+              value={`${metrics.aiAccuracy}%`}
+              icon={<CheckCircle className="w-5 h-5" />}
+              trend="+0.3% today"
+              color="emerald"
+            />
+          </motion.div>
+          <motion.div variants={itemVariants} className="lg:col-span-1.5">
+            <MetricsCard
+              title="Throughput"
+              value={metrics.throughtput}
+              icon={<TrendingUp className="w-5 h-5" />}
+              trend="tx/sec"
+              color="emerald"
+            />
+          </motion.div>
         </motion.div>
 
         {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Quadrant Chart */}
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
             className="lg:col-span-2"
           >
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className={`rounded-2xl border transition-all duration-300 p-6 h-full shadow-lg ${
+              darkMode 
+                ? 'bg-gray-800 border-gray-700 hover:border-emerald-500/50' 
+                : 'bg-white border-gray-200 hover:border-emerald-400 hover:shadow-xl'
+            }`}>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent">
                     Funding Quadrant Analysis
                   </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-emerald-300/60 font-mono mt-1">
                     Funding (X) × Impact (Y) × Reputation (size) × Risk (color)
                   </p>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Live
-                  </span>
+                <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+                  <Zap className="w-3 h-3 text-emerald-400" />
+                  <span className="text-xs font-mono text-emerald-300">Live</span>
                 </div>
               </div>
               <QuadrantChart data={quadrantData} />
@@ -169,8 +234,7 @@ export default function DashboardPage() {
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="lg:col-span-1"
+            transition={{ delay: 0.3, duration: 0.5 }}
           >
             <FraudAlerts />
           </motion.div>
@@ -180,94 +244,105 @@ export default function DashboardPage() {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6"
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          {/* Detection Accuracy */}
+          <div className={`rounded-2xl border transition-all duration-300 p-6 shadow-lg ${
+            darkMode 
+              ? 'bg-gray-800 border-gray-700 hover:border-emerald-500/50' 
+              : 'bg-white border-gray-200 hover:border-emerald-400 hover:shadow-xl'
+          }`}>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent mb-4">
               Detection Accuracy
             </h3>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Sybil Attacks</span>
-                  <span className="font-medium text-gray-900 dark:text-white">92%</span>
+            <div className="space-y-4">
+              {[
+                { label: 'Sybil Attacks', value: 92, color: 'from-emerald-400 to-emerald-600' },
+                { label: 'Wash Trading', value: 88, color: 'from-emerald-400 to-emerald-500' },
+                { label: 'Bot Behavior', value: 90, color: 'from-emerald-300 to-emerald-500' },
+              ].map((item, i) => (
+                <div key={i}>
+                  <div className="flex justify-between text-xs mb-2">
+                    <span className="text-emerald-300/70 font-mono">{item.label}</span>
+                    <span className="font-bold text-emerald-400">{item.value}%</span>
+                  </div>
+                  <div className="w-full bg-emerald-950/40 rounded-full h-2 overflow-hidden border border-emerald-500/20">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${item.value}%` }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                      className={`h-full bg-gradient-to-r ${item.color} rounded-full`}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-polkadot-pink h-2 rounded-full" style={{ width: '92%' }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Wash Trading</span>
-                  <span className="font-medium text-gray-900 dark:text-white">88%</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-polkadot-purple h-2 rounded-full" style={{ width: '88%' }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Bot Behavior</span>
-                  <span className="font-medium text-gray-900 dark:text-white">90%</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '90%' }} />
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          {/* Recent Activity */}
+          <div className={`rounded-2xl border transition-all duration-300 p-6 shadow-lg ${
+            darkMode 
+              ? 'bg-gray-800 border-gray-700 hover:border-emerald-500/50' 
+              : 'bg-white border-gray-200 hover:border-emerald-400 hover:shadow-xl'
+          }`}>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent mb-4">
               Recent Activity
             </h3>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm text-gray-900 dark:text-white">Round #12 finalized</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">2 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm text-gray-900 dark:text-white">Sybil attack detected</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">15 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm text-gray-900 dark:text-white">New project added</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">1 hour ago</p>
-                </div>
-              </div>
+            <div className="space-y-4">
+              {[
+                { label: 'Round #12 finalized', time: '2 min ago', status: 'success' },
+                { label: 'Sybil attack detected', time: '15 min ago', status: 'alert' },
+                { label: 'New project added', time: '1 hour ago', status: 'info' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-start space-x-3"
+                >
+                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                    item.status === 'success' ? 'bg-emerald-400' :
+                    item.status === 'alert' ? 'bg-red-400' :
+                    'bg-blue-400'
+                  } animate-pulse`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-emerald-100 font-medium truncate">{item.label}</p>
+                    <p className="text-xs text-emerald-400/60 font-mono">{item.time}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          {/* Network Stats */}
+          <div className{`rounded-2xl border transition-all duration-300 p-6 shadow-lg ${
+            darkMode 
+              ? 'bg-gray-800 border-gray-700 hover:border-emerald-500/50' 
+              : 'bg-white border-gray-200 hover:border-emerald-400 hover:shadow-xl'
+          }`}>
+            <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent mb-4">
               Network Stats
             </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Connected Nodes</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">3/3</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Block Height</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">1,234,567</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Avg Block Time</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">6.2s</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Total Projects</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-white">47</span>
-              </div>
+            <div className="space-y-4">
+              {[
+                { label: 'Connected Nodes', value: '3/3' },
+                { label: 'Block Height', value: '1,234,567' },
+                { label: 'Avg Block Time', value: '6.2s' },
+                { label: 'Total Projects', value: '47' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  className="flex justify-between items-center group"
+                >
+                  <span className="text-xs text-emerald-300/70 font-mono group-hover:text-emerald-300 transition-colors">{item.label}</span>
+                  <span className="text-sm font-bold text-emerald-400 font-mono">{item.value}</span>
+                </motion.div>
+              ))}
             </div>
           </div>
         </motion.div>

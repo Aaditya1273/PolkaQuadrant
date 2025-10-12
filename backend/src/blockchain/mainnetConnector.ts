@@ -1,6 +1,5 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { EventRecord } from '@polkadot/types/interfaces';
-import type { Vec } from '@polkadot/types';
 
 /**
  * Polkadot Mainnet Connector
@@ -268,7 +267,7 @@ export class MainnetConnector {
       try {
         const roundCount = await api.query.quadraticFunding?.roundCount?.();
         if (roundCount) {
-          const count = roundCount.toNumber();
+          const count = Number(roundCount.toString());
 
           for (let i = 0; i < count; i++) {
             const round = await api.query.quadraticFunding?.rounds?.(i);
@@ -369,7 +368,7 @@ export class MainnetConnector {
         const events = await api.query.system.events.at(blockHash);
 
         // Filter for contribution events
-        events.forEach((record: EventRecord) => {
+        (events as any).forEach((record: EventRecord) => {
           const { event } = record;
 
           // Check if this is a contribution event

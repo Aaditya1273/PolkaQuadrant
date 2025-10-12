@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { fraudDetector } from '../ai/fraudDetection';
+import { fraudDetector } from '../ai/fraudDetection.simple';
 import { dataGenerator } from '../ai/dataGenerator';
-import { modelTrainer } from '../ai/training';
+import { modelTrainer } from '../ai/training.simple';
 import {
   ContributionData,
   BatchAnalysisRequest,
@@ -34,13 +34,13 @@ router.post('/analyze-contribution', async (req: Request, res: Response) => {
     // Analyze contribution
     const result = await fraudDetector.analyzeContribution(contribution);
 
-    res.json({
+    return res.json({
       success: true,
       data: result,
     });
   } catch (error: any) {
     console.error('Error analyzing contribution:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Analysis failed',
       message: error.message,
     });
@@ -89,7 +89,7 @@ router.post('/analyze-round', async (req: Request, res: Response) => {
       processedAt: new Date().toISOString(),
     };
 
-    res.json({
+    return res.json({
       success: true,
       roundId: roundId || 'unknown',
       data: response,
@@ -97,7 +97,7 @@ router.post('/analyze-round', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error analyzing round:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Round analysis failed',
       message: error.message,
     });
@@ -114,7 +114,7 @@ router.get('/risk-report/:roundId', async (req: Request, res: Response) => {
 
     // This would typically fetch from database
     // For now, return a mock report
-    res.json({
+    return res.json({
       success: true,
       roundId,
       report: {
@@ -125,7 +125,7 @@ router.get('/risk-report/:roundId', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error generating risk report:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Report generation failed',
       message: error.message,
     });
@@ -142,29 +142,28 @@ router.post('/train', async (req: Request, res: Response) => {
 
     console.log(`Starting ${mode} training...`);
 
-    let result;
     switch (mode) {
       case 'quick':
-        result = await modelTrainer.quickTrain();
+        await modelTrainer.quickTrain();
         break;
       case 'production':
-        result = await modelTrainer.productionTrain();
+        await modelTrainer.productionTrain();
         break;
       case 'latam':
-        result = await modelTrainer.trainForLATAM({ datasetSize, epochs });
+        await modelTrainer.trainForLATAM({ datasetSize, epochs });
         break;
       default:
-        result = await modelTrainer.train({ datasetSize, epochs });
+        await modelTrainer.train({ datasetSize, epochs });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Model training completed',
       mode,
     });
   } catch (error: any) {
     console.error('Error training model:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Training failed',
       message: error.message,
     });
@@ -196,14 +195,14 @@ router.post('/generate-dataset', async (req: Request, res: Response) => {
 
     const statistics = dataGenerator.getDatasetStatistics(dataset);
 
-    res.json({
+    return res.json({
       success: true,
       data: dataset,
       statistics,
     });
   } catch (error: any) {
     console.error('Error generating dataset:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Dataset generation failed',
       message: error.message,
     });
@@ -214,7 +213,7 @@ router.post('/generate-dataset', async (req: Request, res: Response) => {
  * GET /api/v1/ai/model-info
  * Get information about the loaded model
  */
-router.get('/model-info', async (req: Request, res: Response) => {
+router.get('/model-info', async (_req: Request, res: Response) => {
   try {
     const isLoaded = (fraudDetector as any).isModelLoaded;
 
@@ -226,7 +225,7 @@ router.get('/model-info', async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       loaded: true,
       threshold: (fraudDetector as any).threshold,
@@ -244,7 +243,7 @@ router.get('/model-info', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error getting model info:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Failed to get model info',
       message: error.message,
     });
@@ -261,13 +260,13 @@ router.post('/load-model', async (req: Request, res: Response) => {
 
     await fraudDetector.loadModel(modelPath);
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Model loaded successfully',
     });
   } catch (error: any) {
     console.error('Error loading model:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Model loading failed',
       message: error.message,
     });
@@ -278,7 +277,7 @@ router.post('/load-model', async (req: Request, res: Response) => {
  * GET /api/v1/ai/demo
  * Demo endpoint showing AI capabilities
  */
-router.get('/demo', async (req: Request, res: Response) => {
+router.get('/demo', async (_req: Request, res: Response) => {
   try {
     // Generate sample data
     const sampleData = dataGenerator.generateBuenosAiresArtGrant(20);
@@ -294,7 +293,7 @@ router.get('/demo', async (req: Request, res: Response) => {
       samples.map((c) => fraudDetector.analyzeContribution(c))
     );
 
-    res.json({
+    return res.json({
       success: true,
       message: 'AI Fraud Detection Demo',
       demo: {
@@ -312,7 +311,7 @@ router.get('/demo', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error running demo:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Demo failed',
       message: error.message,
     });

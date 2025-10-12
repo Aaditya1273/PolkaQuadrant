@@ -188,8 +188,8 @@ export class PalletInteraction {
   async getBalance(address: string, network?: NetworkType): Promise<string> {
     try {
       const api = mainnetConnector.getApi(network);
-      const { data: balance } = await api.query.system.account(address);
-      return balance.free.toString();
+      const accountInfo: any = await api.query.system.account(address);
+      return accountInfo.data?.free.toString() || '0';
     } catch (error) {
       console.error('Error getting balance:', error);
       return '0';
@@ -254,7 +254,7 @@ export class PalletInteraction {
     api: ApiPromise
   ): Promise<TransactionResult> {
     return new Promise((resolve) => {
-      tx.signAndSend(signer, ({ status, events, dispatchError }: any) => {
+      tx.signAndSend(signer, ({ status, dispatchError }: any) => {
         if (status.isInBlock) {
           console.log(`✅ Transaction included in block ${status.asInBlock.toString()}`);
 
@@ -299,10 +299,10 @@ export class PalletInteraction {
   async estimateFee(
     tx: any,
     address: string,
-    network?: NetworkType
+    _network?: NetworkType
   ): Promise<string> {
     try {
-      const api = mainnetConnector.getApi(network);
+      // Network parameter available for future use if needed
       const info = await tx.paymentInfo(address);
       return info.partialFee.toString();
     } catch (error) {

@@ -6,6 +6,7 @@ import compression from 'compression';
 import dotenv from 'dotenv';
 import aiRoutes from './routes/ai';
 import blockchainRoutes from './routes/blockchain';
+import betaTestingRoutes from './routes/betaTesting';
 import { mainnetConnector } from './blockchain/mainnetConnector';
 
 // Load environment variables
@@ -26,7 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', async (req: Request, res: Response) => {
+app.get('/health', async (_req: Request, res: Response) => {
   const connectedNetworks = mainnetConnector.getConnectedNetworks();
   
   res.status(200).json({
@@ -49,9 +50,10 @@ app.get('/health', async (req: Request, res: Response) => {
 // API routes
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/blockchain', blockchainRoutes);
+app.use('/api/v1/feedback', betaTestingRoutes);
 
 // API root
-app.get('/api/v1', (req: Request, res: Response) => {
+app.get('/api/v1', (_req: Request, res: Response) => {
   res.json({
     message: 'PolkaQuadrant API v1 - AI-Secured Quadratic Funding Validator',
     endpoints: {
@@ -78,8 +80,16 @@ app.get('/api/v1', (req: Request, res: Response) => {
         blockNumber: 'GET /api/v1/blockchain/block-number',
         status: 'GET /api/v1/blockchain/status',
       },
-      metrics: '/api/v1/metrics (coming soon)',
-      feedback: '/api/v1/feedback (coming soon)',
+      feedback: {
+        submit: 'POST /api/v1/feedback/submit',
+        list: 'GET /api/v1/feedback/list',
+        metrics: 'POST /api/v1/feedback/metrics',
+        getMetrics: 'GET /api/v1/feedback/metrics/:testerId',
+        survey: 'POST /api/v1/feedback/survey',
+        analytics: 'GET /api/v1/feedback/analytics',
+        export: 'GET /api/v1/feedback/export',
+        testers: 'GET /api/v1/feedback/testers',
+      },
     },
   });
 });
@@ -93,7 +103,7 @@ app.use((req: Request, res: Response) => {
 });
 
 // Error handler
-app.use((err: Error, req: Request, res: Response) => {
+app.use((err: Error, _req: Request, res: Response, _next: express.NextFunction) => {
   console.error(err.stack);
   res.status(500).json({
     error: 'Internal Server Error',

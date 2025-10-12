@@ -8,7 +8,7 @@ interface MetricsCardProps {
   value: string | number;
   icon: ReactNode;
   trend?: string;
-  color: 'blue' | 'red' | 'green' | 'purple';
+  color: 'blue' | 'red' | 'green' | 'purple' | 'emerald';
 }
 
 const colorClasses = {
@@ -31,6 +31,11 @@ const colorClasses = {
     bg: 'bg-purple-100 dark:bg-purple-900/30',
     text: 'text-purple-600 dark:text-purple-400',
     border: 'border-purple-200 dark:border-purple-800',
+  },
+  emerald: {
+    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    border: 'border-emerald-200 dark:border-emerald-800',
   },
 };
 
