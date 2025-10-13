@@ -4,37 +4,37 @@
 
 @layer base {
   :root {
-    /* Neon Green & Black Theme */
-    --background: 0 0% 0%;
-    --foreground: 120 100% 99%;
-    --card: 0 0% 8%;
-    --card-foreground: 120 100% 95%;
-    --popover: 0 0% 6%;
-    --popover-foreground: 120 100% 95%;
+    /* Light Theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
     
-    /* Vibrant Neon Green Primary */
+    /* Emerald Primary */
     --primary: 149 100% 53%;
-    --primary-foreground: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
     
-    /* Secondary - Darker Green */
+    /* Secondary */
     --secondary: 149 85% 38%;
-    --secondary-foreground: 120 100% 95%;
+    --secondary-foreground: 0 0% 100%;
     
     /* Muted Tones */
-    --muted: 0 0% 20%;
-    --muted-foreground: 120 50% 60%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
     
-    /* Accent - Bright Neon */
+    /* Accent */
     --accent: 149 100% 45%;
-    --accent-foreground: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
     
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
     /* Borders & Inputs */
-    --border: 149 80% 30%;
-    --input: 0 0% 12%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
     --ring: 149 100% 53%;
     
     --radius: 0.5rem;

@@ -52,7 +52,7 @@ export default function MetricsCard({
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ type: 'spring', stiffness: 300 }}
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border ${colors.border} hover:shadow-xl transition-shadow`}
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all hover:border-emerald-400"
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">

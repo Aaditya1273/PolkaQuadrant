@@ -52,9 +52,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'your-google-verification-code',
-  },
 }
 
 export const viewport: Viewport = {
@@ -80,6 +77,17 @@ export default function RootLayout({
       className={inter.variable}
     >
       <head>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if (typeof window !== 'undefined' && window.ethereum) {
+              window.ethereum = new Proxy(window.ethereum, {
+                deleteProperty: () => true,
+                has: () => true,
+                get: (target, prop) => target[prop]
+              });
+            }
+          `
+        }} />
         {/* Preconnect to external services */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

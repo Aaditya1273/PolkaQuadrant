@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { AlertTriangle, Shield, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import AlertsModal from './AlertsModal';
 
 interface Alert {
   id: string;
@@ -12,30 +14,46 @@ interface Alert {
 }
 
 export default function FraudAlerts() {
-  // Mock alerts - will be replaced with real data
-  const alerts: Alert[] = [
-    {
-      id: '1',
-      type: 'sybil',
-      project: 'Project C',
-      riskScore: 0.85,
-      timestamp: '5 min ago',
-    },
-    {
-      id: '2',
-      type: 'wash',
-      project: 'Project F',
-      riskScore: 0.72,
-      timestamp: '12 min ago',
-    },
-    {
-      id: '3',
-      type: 'bot',
-      project: 'Project H',
-      riskScore: 0.68,
-      timestamp: '23 min ago',
-    },
-  ];
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const response = await fetch('http://localhost:4001/api/v1/ai/demo');
+        const data = await response.json();
+        
+        if (data.highRiskProjects && data.highRiskProjects.length > 0) {
+          const formattedAlerts = data.highRiskProjects.slice(0, 3).map((project: any, index: number) => ({
+            id: project.id || `alert-${index}`,
+            type: project.riskScore > 0.8 ? 'sybil' : project.riskScore > 0.6 ? 'wash' : 'bot',
+            project: project.name || `Project ${index}`,
+            riskScore: project.riskScore || 0.5,
+            timestamp: `${Math.floor(Math.random() * 30)} min ago`,
+          }));
+          setAlerts(formattedAlerts);
+        } else {
+          // Use fallback if no data
+          setAlerts([
+            { id: '1', type: 'sybil', project: 'Project C', riskScore: 0.85, timestamp: '5 min ago' },
+            { id: '2', type: 'wash', project: 'Project F', riskScore: 0.72, timestamp: '12 min ago' },
+            { id: '3', type: 'bot', project: 'Project H', riskScore: 0.68, timestamp: '23 min ago' },
+          ]);
+        }
+      } catch (error) {
+        // Use fallback demo data if backend is offline
+        setAlerts([
+          { id: '1', type: 'sybil', project: 'Project C', riskScore: 0.85, timestamp: '5 min ago' },
+          { id: '2', type: 'wash', project: 'Project F', riskScore: 0.72, timestamp: '12 min ago' },
+          { id: '3', type: 'bot', project: 'Project H', riskScore: 0.68, timestamp: '23 min ago' },
+        ]);
+      }
+    };
+
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getAlertIcon = (type: string) => {
     switch (type) {
@@ -70,12 +88,12 @@ export default function FraudAlerts() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 h-full">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 h-full hover:shadow-xl transition-all hover:border-emerald-400">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Fraud Alerts
         </h2>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white">
           {alerts.length} Active
         </span>
       </div>
@@ -132,10 +150,16 @@ export default function FraudAlerts() {
       )}
 
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <button className="w-full text-center text-sm font-medium text-polkadot-pink hover:text-polkadot-purple transition-colors">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="w-full text-center text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+        >
           View All Alerts →
         </button>
       </div>
+
+      {/* Modal */}
+      <AlertsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

@@ -158,22 +158,22 @@ export default function QuadrantChart({ data }: QuadrantChartProps) {
       <canvas ref={chartRef} />
       
       {/* Legend for risk colors */}
-      <div className="mt-4 flex flex-wrap gap-4 justify-center text-sm">
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-green-500" />
-          <span className="text-gray-600 dark:text-gray-400">Low Risk (&lt;30%)</span>
+      <div className="mt-4 flex flex-wrap gap-3 justify-center text-xs">
+        <div className="flex items-center space-x-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+          <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">Low Risk (&lt;30%)</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-yellow-500" />
-          <span className="text-gray-600 dark:text-gray-400">Medium Risk (30-50%)</span>
+        <div className="flex items-center space-x-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+          <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">Medium (30-50%)</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-500" />
-          <span className="text-gray-600 dark:text-gray-400">High Risk (50-70%)</span>
+        <div className="flex items-center space-x-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+          <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">High (50-70%)</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-red-500" />
-          <span className="text-gray-600 dark:text-gray-400">Very High Risk (&gt;70%)</span>
+        <div className="flex items-center space-x-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+          <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">Very High (&gt;70%)</span>
         </div>
       </div>
     </div>
