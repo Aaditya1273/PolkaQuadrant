@@ -19,7 +19,7 @@
 
 ---
 
-## 🚨 The Problem
+## 🚨 The Problem:
 
 ### Quadratic Funding is Broken by Fraud
 
